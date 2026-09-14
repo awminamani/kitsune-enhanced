@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
 import type { Anime } from '@/lib/types';
 import MovieCard from './MovieCard';
+import SearchCommand from '@/components/navigation/SearchCommand';
 
 export default function MoviesClient({ initialMovies }: { initialMovies: Anime[] }) {
   const [movies, setMovies] = useState<Anime[]>(initialMovies);
@@ -13,10 +14,9 @@ export default function MoviesClient({ initialMovies }: { initialMovies: Anime[]
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
 
-  // Track scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
@@ -60,7 +60,11 @@ export default function MoviesClient({ initialMovies }: { initialMovies: Anime[]
     }
   }, [initialMovies]);
 
-  // IntersectionObserver
+  const handleSearchSelect = useCallback((result: any) => {
+    setSearchOpen(false);
+    handleSearch(result.title);
+  }, [handleSearch]);
+
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
@@ -74,58 +78,35 @@ export default function MoviesClient({ initialMovies }: { initialMovies: Anime[]
 
   return (
     <div>
-      {/* Search - transforms from bar to icon on scroll */}
+      {/* Search area */}
       <div className="h-12 mb-4 relative">
-        {/* Full bar at top (visible when not scrolled) */}
+        {/* Full bar at top */}
         <div
           className={`absolute inset-0 flex items-center transition-all duration-300 ${
             scrolled ? 'opacity-0 -translate-y-2 pointer-events-none' : 'opacity-100'
           }`}
         >
-          <div className="relative w-full max-w-sm">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Search movies..."
-              className="w-full rounded-full bg-bg-card border border-border pl-9 pr-4 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-accent-violet/40"
-            />
-          </div>
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-3 w-full max-w-sm rounded-full bg-bg-card border border-border px-4 py-2.5 text-left text-text-muted hover:border-accent-violet/40 transition-colors"
+          >
+            <Search size={16} />
+            <span className="text-sm">Search movies...</span>
+          </button>
         </div>
 
-        {/* Compact icon (visible when scrolled) - top right */}
+        {/* Floating icon when scrolled */}
         <div
           className={`fixed top-3 right-4 z-40 transition-all duration-300 ${
             scrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
           }`}
         >
-          {searchExpanded ? (
-            <div className="relative animate-fade-in">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder="Search..."
-                autoFocus
-                className="w-48 rounded-full bg-bg-card border border-border pl-9 pr-8 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-accent-violet/40 shadow-lg"
-              />
-              <button
-                onClick={() => { setSearchExpanded(false); handleSearch(''); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setSearchExpanded(true)}
-              className="w-10 h-10 rounded-full bg-bg-soft/90 border border-border flex items-center justify-center text-text-muted hover:text-text hover:border-accent-violet/40 transition-colors backdrop-blur-sm shadow-lg"
-            >
-              <Search size={18} />
-            </button>
-          )}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="w-10 h-10 rounded-full bg-bg-soft/90 border border-border flex items-center justify-center text-text-muted hover:text-text hover:border-accent-violet/40 transition-colors backdrop-blur-sm shadow-lg"
+          >
+            <Search size={18} />
+          </button>
         </div>
       </div>
 
@@ -174,6 +155,13 @@ export default function MoviesClient({ initialMovies }: { initialMovies: Anime[]
           <div ref={sentinel} className="h-1" aria-hidden="true" />
         </>
       )}
+
+      {/* Shared SearchCommand dialog */}
+      <SearchCommand
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelect={handleSearchSelect}
+      />
     </div>
   );
 }
