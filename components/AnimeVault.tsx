@@ -63,8 +63,8 @@ export default function AnimeVault({
       <Aurora />
       <Grain opacity={0.03} />
 
-      <Navbar onSearchOpen={() => setSearchOpen(true)} />
-      <MobileNav />
+      <Navbar />
+      <MobileNav onSearchOpen={() => setSearchOpen(true)} />
 
       <main className="pt-14 md:pt-16">
         {heroAnime && (
