@@ -10,20 +10,12 @@ import { GlowOrb } from "@/components/effects";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { PlayIcon, StarIcon } from "@/components/icons";
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-
 interface AnimeHeroProps {
   anime: Anime;
   items?: Anime[];
   activeIndex?: number;
   onDotClick?: (i: number) => void;
 }
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
 
 function heroBg(anime: Anime): string {
   return anime.banner || anime.cover || "/placeholder.svg";
@@ -41,10 +33,6 @@ function TitleWords({ text, className }: { text: string; className?: string }) {
     </h1>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  Sub-components                                                     */
-/* ------------------------------------------------------------------ */
 
 function ScrollIndicator() {
   return (
@@ -66,7 +54,6 @@ function ScrollIndicator() {
   );
 }
 
-/** Pagination dots — positioned at top-right so they don't overlap genre chips. */
 function PaginationDots({
   count,
   active,
@@ -93,7 +80,6 @@ function PaginationDots({
   );
 }
 
-/** Chevron arrows for manual navigation. */
 function HeroArrows({
   onPrev,
   onNext,
@@ -125,10 +111,6 @@ function HeroArrows({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main Component                                                     */
-/* ------------------------------------------------------------------ */
-
 export default function AnimeHero({
   anime,
   items,
@@ -148,7 +130,6 @@ export default function AnimeHero({
   const reduced = prefersReducedMotion();
   const coarse = isCoarsePointer();
 
-  /* Swipe / drag tracking */
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
@@ -179,12 +160,10 @@ export default function AnimeHero({
     }
   }, [goNext, goPrev]);
 
-  /* Reset image src when anime changes */
   useEffect(() => {
     setImgSrc(heroBg(anime));
   }, [anime]);
 
-  /* ---------------- GSAP Entrance Timeline ---------------- */
   useEffect(() => {
     if (reduced) {
       gsap.set(
@@ -197,7 +176,6 @@ export default function AnimeHero({
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      /* 1. Background fade + subtle scale */
       tl.fromTo(
         bgRef.current,
         { opacity: 0, scale: 1.05 },
@@ -205,7 +183,6 @@ export default function AnimeHero({
         0
       );
 
-      /* 2. Poster reveal — slide from left with spring */
       tl.fromTo(
         posterRef.current,
         { x: -80, opacity: 0, rotate: -3 },
@@ -213,7 +190,6 @@ export default function AnimeHero({
         0.2
       );
 
-      /* 3. Title clip/mask reveal */
       const titleWords = titleRef.current?.querySelectorAll(".hero-title-word") || [];
       tl.fromTo(
         titleWords,
@@ -228,7 +204,6 @@ export default function AnimeHero({
         0.45
       );
 
-      /* 4. Metadata stagger */
       const metaItems = metaRef.current?.querySelectorAll(".hero-meta-item") || [];
       tl.fromTo(
         metaItems,
@@ -237,7 +212,6 @@ export default function AnimeHero({
         0.9
       );
 
-      /* 5. Description fade */
       tl.fromTo(
         descRef.current,
         { y: 20, opacity: 0 },
@@ -245,7 +219,6 @@ export default function AnimeHero({
         1.05
       );
 
-      /* 6. CTA buttons enter */
       const ctaBtns = ctaRef.current?.querySelectorAll(".hero-cta-btn") || [];
       tl.fromTo(
         ctaBtns,
@@ -261,7 +234,6 @@ export default function AnimeHero({
         1.2
       );
 
-      /* Genre chips */
       const chips = chipsRef.current?.querySelectorAll(".hero-chip") || [];
       tl.fromTo(
         chips,
@@ -274,8 +246,6 @@ export default function AnimeHero({
     return () => ctx.revert();
   }, [anime, reduced]);
 
-  /* ---------------- Render ---------------- */
-
   const dotCount = items?.length ?? 1;
   const display = anime;
 
@@ -287,7 +257,7 @@ export default function AnimeHero({
       onTouchStart={coarse ? handleTouchStart : undefined}
       onTouchEnd={coarse ? handleTouchEnd : undefined}
     >
-      {/* ===== Background layers ===== */}
+      {/* Background */}
       <div ref={bgRef} className="hero-bg" aria-hidden="true">
         <img
           src={imgSrc}
@@ -300,24 +270,24 @@ export default function AnimeHero({
         <div className="hero-bg-grain" />
       </div>
 
-      {/* ===== Ambient orbs ===== */}
+      {/* Ambient orbs */}
       <GlowOrb size={380} color="violet" drift="a" className="hero-orb hero-orb-violet" />
       <GlowOrb size={280} color="cyan" drift="b" className="hero-orb hero-orb-cyan" />
       <GlowOrb size={200} color="pink" drift="a" className="hero-orb hero-orb-pink" />
 
-      {/* ===== Nav arrows ===== */}
+      {/* Nav arrows */}
       {dotCount > 1 && <HeroArrows onPrev={goPrev} onNext={goNext} />}
 
-      {/* ===== Pagination dots (top-right, not overlapping chips) ===== */}
+      {/* Pagination dots */}
       <PaginationDots
         count={dotCount}
         active={activeIndex}
         onClick={onDotClick || (() => {})}
       />
 
-      {/* ===== Content ===== */}
+      {/* Content */}
       <div className="hero-content">
-        {/* ---- Left: Poster ---- */}
+        {/* Poster */}
         <div ref={posterRef} className="hero-poster-wrap">
           <div className="hero-poster">
             <img
@@ -329,12 +299,12 @@ export default function AnimeHero({
           </div>
         </div>
 
-        {/* ---- Right: Info ---- */}
+        {/* Info */}
         <div className="hero-info">
           <div className="hero-title-clip" ref={titleRef}>
             <TitleWords
               text={display.title}
-              className="font-display font-bold text-balance leading-[1.05] tracking-tight text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-text-default"
+              className="font-display font-bold text-balance leading-[1.05] tracking-tight text-3xl sm:text-5xl lg:text-6xl xl:text-7xl text-text-default"
             />
           </div>
 

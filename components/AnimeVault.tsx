@@ -51,27 +51,8 @@ export default function AnimeVault({
     year: number | null;
     genres: string[];
     episodes?: number;
-    synopsis?: string;
-    siteUrl?: string;
-    trailerYoutubeId?: string;
   }) => {
     setSearchOpen(false);
-    // Convert search result to Anime format for modal
-    const anime: Anime = {
-      id: result.id,
-      source: result.scoreSource || 'anilist',
-      title: result.title,
-      cover: result.cover,
-      score: result.score ?? undefined,
-      scoreSource: result.scoreSource || 'anilist',
-      year: result.year ?? undefined,
-      episodes: result.episodes,
-      genres: result.genres,
-      synopsis: result.synopsis || '',
-      trailerYoutubeId: result.trailerYoutubeId,
-      siteUrl: result.siteUrl || `https://anilist.co/anime/${result.id}`,
-    };
-    setOpenAnime(anime);
   }, []);
 
   return (
@@ -80,7 +61,7 @@ export default function AnimeVault({
       <Grain opacity={0.03} />
 
       <Navbar onSearchOpen={() => setSearchOpen(true)} />
-      <MobileNav onSearchOpen={() => setSearchOpen(true)} />
+      <MobileNav />
 
       <main>
         {heroAnime && (
@@ -97,7 +78,6 @@ export default function AnimeVault({
             <AnimeRail
               items={trending}
               title="Trending Now"
-              viewAllHref="/trending"
               onCardClick={handleCardClick}
             />
           </div>
@@ -107,7 +87,6 @@ export default function AnimeVault({
           <AnimeRail
             items={movies}
             title="Top Movies"
-            viewAllHref="/movies"
             className="pt-12"
             onCardClick={handleCardClick}
           />
@@ -116,29 +95,11 @@ export default function AnimeVault({
         {topMal.length > 0 && (
           <AnimeRail
             items={topMal}
-            title="Top Ranked on MyAnimeList"
+            title="Top Ranked"
             showRank
             className="pt-12"
             onCardClick={handleCardClick}
           />
-        )}
-
-        {genres.length > 0 && (
-          <section className="px-4 sm:px-6 lg:px-8 py-12">
-            <h2 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight mb-4">
-              Browse by Genre
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {genres.map((g) => (
-                <button
-                  key={g}
-                  className="px-3 py-1.5 text-sm rounded-full bg-bg-card border border-border text-text-muted hover:text-text hover:border-accent-violet/40 transition-colors"
-                >
-                  {g}
-                </button>
-              ))}
-            </div>
-          </section>
         )}
       </main>
 
