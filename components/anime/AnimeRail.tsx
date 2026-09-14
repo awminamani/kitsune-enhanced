@@ -13,6 +13,7 @@ interface AnimeRailProps {
   showRank?: boolean;
   viewAllHref?: string;
   className?: string;
+  onCardClick?: (anime: Anime) => void;
 }
 
 export function AnimeRail({
@@ -21,6 +22,7 @@ export function AnimeRail({
   showRank = false,
   viewAllHref,
   className,
+  onCardClick,
 }: AnimeRailProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     dragFree: true,
@@ -109,11 +111,14 @@ export function AnimeRail({
           <div className="flex gap-4 pl-4 sm:pl-6 lg:pl-8 pr-4 sm:pr-6 lg:pr-8">
             {items.map((anime, i) => (
               <div key={anime.id} className="shrink-0 w-40 sm:w-44">
-                <Link
-                  href={anime.siteUrl}
-                  className="group relative block outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary"
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onCardClick?.(anime)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onCardClick?.(anime); }}
+                  className="group relative block outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary cursor-pointer"
                 >
-                  <div className="relative rounded-lg overflow-hidden bg-bg-card border border-border cursor-pointer will-change-transform transition-transform duration-300 hover:scale-[1.03] hover:border-accent-violet/40">
+                  <div className="relative rounded-lg overflow-hidden bg-bg-card border border-border will-change-transform transition-transform duration-300 hover:scale-[1.03] hover:border-accent-violet/40">
                     <div className="relative aspect-[2/3] overflow-hidden">
                       <img
                         src={anime.cover}
@@ -122,13 +127,18 @@ export function AnimeRail({
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                       />
                       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="w-12 h-12 rounded-full bg-violet-600/90 flex items-center justify-center shadow-lg shadow-violet-600/30">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                      </div>
                       {anime.score != null && (
                         <div className="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-sm px-1.5 py-1 text-xs font-semibold text-amber-400">
                           <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
                           <span>{anime.scoreSource === 'mal' ? anime.score.toFixed(2) : `${anime.score}%`}</span>
                         </div>
                       )}
-                      {showRank && i < 9 && (
+                      {showRank && (
                         <div className="absolute top-2 left-2 flex items-center justify-center w-6 h-6 rounded-md bg-violet-600/80 backdrop-blur-sm text-xs font-bold text-white">
                           {i + 1}
                         </div>
@@ -141,7 +151,7 @@ export function AnimeRail({
                       </p>
                     </div>
                   </div>
-                </Link>
+                </div>
               </div>
             ))}
           </div>

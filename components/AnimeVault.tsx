@@ -38,15 +38,40 @@ export default function AnimeVault({
     return () => clearInterval(t);
   }, [heroItems.length]);
 
+  const handleCardClick = useCallback((anime: Anime) => {
+    setOpenAnime(anime);
+  }, []);
+
   const handleSearchSelect = useCallback((result: {
-    id: number;
+    id: string;
     title: string;
-    coverImage: string;
+    cover: string;
     score: number | null;
+    scoreSource?: 'anilist' | 'mal';
     year: number | null;
+    genres: string[];
+    episodes?: number;
+    synopsis?: string;
+    siteUrl?: string;
+    trailerYoutubeId?: string;
   }) => {
     setSearchOpen(false);
-    console.log("Selected:", result.title);
+    // Convert search result to Anime format for modal
+    const anime: Anime = {
+      id: result.id,
+      source: result.scoreSource || 'anilist',
+      title: result.title,
+      cover: result.cover,
+      score: result.score ?? undefined,
+      scoreSource: result.scoreSource || 'anilist',
+      year: result.year ?? undefined,
+      episodes: result.episodes,
+      genres: result.genres,
+      synopsis: result.synopsis || '',
+      trailerYoutubeId: result.trailerYoutubeId,
+      siteUrl: result.siteUrl || `https://anilist.co/anime/${result.id}`,
+    };
+    setOpenAnime(anime);
   }, []);
 
   return (
@@ -73,6 +98,7 @@ export default function AnimeVault({
               items={trending}
               title="Trending Now"
               viewAllHref="/trending"
+              onCardClick={handleCardClick}
             />
           </div>
         )}
@@ -83,6 +109,7 @@ export default function AnimeVault({
             title="Top Movies"
             viewAllHref="/movies"
             className="pt-12"
+            onCardClick={handleCardClick}
           />
         )}
 
@@ -92,6 +119,7 @@ export default function AnimeVault({
             title="Top Ranked on MyAnimeList"
             showRank
             className="pt-12"
+            onCardClick={handleCardClick}
           />
         )}
 
