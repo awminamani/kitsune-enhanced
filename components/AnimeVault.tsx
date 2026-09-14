@@ -3,7 +3,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { Anime } from "@/lib/types";
-import { Aurora, Grain, ParticlesBackground } from "@/components/effects";
+import { Aurora, Grain } from "@/components/effects";
 import { Navbar, MobileNav, SearchCommand } from "@/components/navigation";
 import AnimeHero from "@/components/anime/AnimeHero";
 import { AnimeRail } from "@/components/anime/AnimeRail";
@@ -26,11 +26,9 @@ export default function AnimeVault({
   const [searchOpen, setSearchOpen] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
 
-  // Build hero pool: top of trending
   const heroItems = trending.slice(0, Math.min(6, trending.length));
   const heroAnime = heroItems[heroIndex] ?? trending[0];
 
-  // Auto-rotate hero
   useEffect(() => {
     if (heroItems.length <= 1) return;
     const t = setInterval(
@@ -53,16 +51,12 @@ export default function AnimeVault({
 
   return (
     <>
-      {/* Background effects */}
       <Aurora />
       <Grain opacity={0.03} />
-      <ParticlesBackground />
 
-      {/* Navigation */}
       <Navbar onSearchOpen={() => setSearchOpen(true)} />
       <MobileNav onSearchOpen={() => setSearchOpen(true)} />
 
-      {/* Hero */}
       <main>
         {heroAnime && (
           <AnimeHero
@@ -73,7 +67,6 @@ export default function AnimeVault({
           />
         )}
 
-        {/* Trending rail */}
         {trending.length > 0 && (
           <div className="relative z-10 -mt-8">
             <AnimeRail
@@ -84,7 +77,6 @@ export default function AnimeVault({
           </div>
         )}
 
-        {/* Top Movies rail */}
         {movies.length > 0 && (
           <AnimeRail
             items={movies}
@@ -94,7 +86,6 @@ export default function AnimeVault({
           />
         )}
 
-        {/* MAL Top 10 */}
         {topMal.length > 0 && (
           <AnimeRail
             items={topMal}
@@ -104,7 +95,6 @@ export default function AnimeVault({
           />
         )}
 
-        {/* Genre cloud */}
         {genres.length > 0 && (
           <section className="px-4 sm:px-6 lg:px-8 py-12">
             <h2 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight mb-4">
@@ -124,10 +114,8 @@ export default function AnimeVault({
         )}
       </main>
 
-      {/* Detail modal */}
       <AnimeModal anime={openAnime} onClose={() => setOpenAnime(null)} />
 
-      {/* Search command */}
       <SearchCommand
         open={searchOpen}
         onOpenChange={setSearchOpen}
