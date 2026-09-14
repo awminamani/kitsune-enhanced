@@ -153,7 +153,7 @@ export function AnimeRail({
             aria-hidden
             className="pointer-events-none absolute top-0 bottom-0 right-0 w-16 sm:w-24 flex items-center justify-end bg-gradient-to-l from-bg via-bg/80 to-transparent z-10"
           >
-            <div className="mr-2 sm:mr-4 animate-pulse">
+            <div className="mr-2 sm:mr-4">
               <div className="flex items-center gap-0.5 text-violet-400">
                 <ChevronRight className="size-5" />
                 <ChevronRight className="size-5 -ml-2" />

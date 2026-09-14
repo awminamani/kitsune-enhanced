@@ -1,11 +1,11 @@
 // components/anime/AnimeHero.tsx
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import type { Anime } from "@/lib/types";
-import { cn, prefersReducedMotion, scoreLabel } from "@/lib/utils";
+import { cn, prefersReducedMotion, scoreLabel, isCoarsePointer } from "@/lib/utils";
 import { GlowOrb } from "@/components/effects";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { PlayIcon, StarIcon } from "@/components/icons";
@@ -16,7 +16,7 @@ import { PlayIcon, StarIcon } from "@/components/icons";
 
 interface AnimeHeroProps {
   anime: Anime;
-  items?: Anime[];          // when > 1 we show pagination dots
+  items?: Anime[];
   activeIndex?: number;
   onDotClick?: (i: number) => void;
 }
@@ -25,12 +25,10 @@ interface AnimeHeroProps {
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Pick the best background image: banner preferred, cover fallback. */
 function heroBg(anime: Anime): string {
   return anime.banner || anime.cover || "/placeholder.svg";
 }
 
-/** Wrap title words in spans for the clip-mask GSAP reveal. */
 function TitleWords({ text, className }: { text: string; className?: string }) {
   const words = useMemo(() => text.split(" "), [text]);
   return (
@@ -48,7 +46,6 @@ function TitleWords({ text, className }: { text: string; className?: string }) {
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Animated scroll-down chevron at the bottom centre. */
 function ScrollIndicator() {
   return (
     <div className="hero-scroll" aria-hidden="true">
@@ -61,7 +58,7 @@ function ScrollIndicator() {
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="animate-bounce"
+        className="opacity-40 animate-bounce"
       >
         <path d="M6 9l6 6 6-6" />
       </svg>
@@ -69,7 +66,7 @@ function ScrollIndicator() {
   );
 }
 
-/** Pagination dots (● ● ●) shown when multiple hero items exist. */
+/** Pagination dots — positioned at top-right so they don't overlap genre chips. */
 function PaginationDots({
   count,
   active,
@@ -96,6 +93,38 @@ function PaginationDots({
   );
 }
 
+/** Chevron arrows for manual navigation. */
+function HeroArrows({
+  onPrev,
+  onNext,
+}: {
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <>
+      <button
+        onClick={onPrev}
+        aria-label="Previous slide"
+        className="hero-nav-arrow hero-nav-prev"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+      <button
+        onClick={onNext}
+        aria-label="Next slide"
+        className="hero-nav-arrow hero-nav-next"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+    </>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Main Component                                                     */
 /* ------------------------------------------------------------------ */
@@ -117,6 +146,38 @@ export default function AnimeHero({
 
   const [imgSrc, setImgSrc] = useState(heroBg(anime));
   const reduced = prefersReducedMotion();
+  const coarse = isCoarsePointer();
+
+  /* Swipe / drag tracking */
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const goNext = useCallback(() => {
+    if (items && items.length > 1 && onDotClick) {
+      const next = (activeIndex + 1) % items.length;
+      onDotClick(next);
+    }
+  }, [items, activeIndex, onDotClick]);
+
+  const goPrev = useCallback(() => {
+    if (items && items.length > 1 && onDotClick) {
+      const prev = (activeIndex - 1 + items.length) % items.length;
+      onDotClick(prev);
+    }
+  }, [items, activeIndex, onDotClick]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goNext();
+      else goPrev();
+    }
+  }, [goNext, goPrev]);
 
   /* Reset image src when anime changes */
   useEffect(() => {
@@ -126,7 +187,6 @@ export default function AnimeHero({
   /* ---------------- GSAP Entrance Timeline ---------------- */
   useEffect(() => {
     if (reduced) {
-      // Show everything immediately for reduced-motion users
       gsap.set(
         [bgRef.current, posterRef.current, titleRef.current, metaRef.current, descRef.current, ctaRef.current, chipsRef.current],
         { clearProps: "all", opacity: 1, x: 0, y: 0, scale: 1, clipPath: "inset(0 0 0 0)" }
@@ -153,7 +213,7 @@ export default function AnimeHero({
         0.2
       );
 
-      /* 3. Title clip/mask reveal — word by word from bottom */
+      /* 3. Title clip/mask reveal */
       const titleWords = titleRef.current?.querySelectorAll(".hero-title-word") || [];
       tl.fromTo(
         titleWords,
@@ -161,7 +221,6 @@ export default function AnimeHero({
         { y: "0%", duration: 0.7, stagger: 0.06, ease: "power3.out" },
         0.45
       );
-      // Clip container slides up to unveil
       tl.fromTo(
         titleRef.current,
         { clipPath: "inset(100% 0 0 0)" },
@@ -225,43 +284,35 @@ export default function AnimeHero({
       ref={rootRef}
       className="hero-root"
       aria-label={`Hero: ${display.title}`}
+      onTouchStart={coarse ? handleTouchStart : undefined}
+      onTouchEnd={coarse ? handleTouchEnd : undefined}
     >
       {/* ===== Background layers ===== */}
       <div ref={bgRef} className="hero-bg" aria-hidden="true">
-        {/* Full-bleed artwork */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imgSrc}
           alt=""
           className="hero-bg-img"
           onError={() => setImgSrc("/placeholder.svg")}
         />
-        {/* Animated gradient overlay */}
         <div className="hero-bg-gradient" />
-        {/* Dark vignette */}
         <div className="hero-bg-vignette" />
-        {/* Film grain */}
         <div className="hero-bg-grain" />
       </div>
 
       {/* ===== Ambient orbs ===== */}
-      <GlowOrb
-        size={380}
-        color="violet"
-        drift="a"
-        className="hero-orb hero-orb-violet"
-      />
-      <GlowOrb
-        size={280}
-        color="cyan"
-        drift="b"
-        className="hero-orb hero-orb-cyan"
-      />
-      <GlowOrb
-        size={200}
-        color="pink"
-        drift="a"
-        className="hero-orb hero-orb-pink"
+      <GlowOrb size={380} color="violet" drift="a" className="hero-orb hero-orb-violet" />
+      <GlowOrb size={280} color="cyan" drift="b" className="hero-orb hero-orb-cyan" />
+      <GlowOrb size={200} color="pink" drift="a" className="hero-orb hero-orb-pink" />
+
+      {/* ===== Nav arrows ===== */}
+      {dotCount > 1 && <HeroArrows onPrev={goPrev} onNext={goNext} />}
+
+      {/* ===== Pagination dots (top-right, not overlapping chips) ===== */}
+      <PaginationDots
+        count={dotCount}
+        active={activeIndex}
+        onClick={onDotClick || (() => {})}
       />
 
       {/* ===== Content ===== */}
@@ -269,7 +320,6 @@ export default function AnimeHero({
         {/* ---- Left: Poster ---- */}
         <div ref={posterRef} className="hero-poster-wrap">
           <div className="hero-poster">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={display.cover || "/placeholder.svg"}
               alt={display.title}
@@ -281,7 +331,6 @@ export default function AnimeHero({
 
         {/* ---- Right: Info ---- */}
         <div className="hero-info">
-          {/* Title */}
           <div className="hero-title-clip" ref={titleRef}>
             <TitleWords
               text={display.title}
@@ -289,7 +338,6 @@ export default function AnimeHero({
             />
           </div>
 
-          {/* Metadata row */}
           <div ref={metaRef} className="hero-meta">
             {display.score != null && (
               <span className="hero-meta-item hero-score">
@@ -300,26 +348,17 @@ export default function AnimeHero({
               </span>
             )}
             {display.year && (
-              <span className="hero-meta-item hero-badge">
-                {display.year}
-              </span>
+              <span className="hero-meta-item hero-badge">{display.year}</span>
             )}
             {display.episodes && (
-              <span className="hero-meta-item hero-episodes">
-                {display.episodes} EP
-              </span>
+              <span className="hero-meta-item hero-episodes">{display.episodes} EP</span>
             )}
           </div>
 
-          {/* Description */}
-          <p
-            ref={descRef}
-            className="hero-desc line-clamp-3 text-text-muted max-w-xl"
-          >
+          <p ref={descRef} className="hero-desc line-clamp-3 text-text-muted max-w-xl">
             {display.synopsis}
           </p>
 
-          {/* CTAs */}
           <div ref={ctaRef} className="hero-ctas">
             <Magnetic strength={0.35} className="hero-cta-magnetic">
               <Link
@@ -331,35 +370,22 @@ export default function AnimeHero({
               </Link>
             </Magnetic>
             <Magnetic strength={0.2} className="hero-cta-magnetic">
-              <button
-                type="button"
-                className="hero-cta-btn hero-cta-ghost"
-                aria-label={`Add ${display.title} to list`}
-              >
+              <button type="button" className="hero-cta-btn hero-cta-ghost" aria-label={`Add ${display.title} to list`}>
                 <span>Add to List</span>
               </button>
             </Magnetic>
           </div>
 
-          {/* Genre chips */}
           {display.genres.length > 0 && (
             <div ref={chipsRef} className="hero-chips">
               {display.genres.map((genre) => (
-                <span key={genre} className="hero-chip">
-                  {genre}
-                </span>
+                <span key={genre} className="hero-chip">{genre}</span>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* ===== Bottom chrome ===== */}
-      <PaginationDots
-        count={dotCount}
-        active={activeIndex}
-        onClick={onDotClick || (() => {})}
-      />
       <ScrollIndicator />
     </section>
   );

@@ -15,8 +15,7 @@ function GithubIcon({ size = 16 }: { size?: number }) {
 import gsap from 'gsap';
 
 const NAV_LINKS = [
-  { label: 'Discover', href: '/discover' },
-  { label: 'Trending', href: '/trending' },
+  { label: 'Home', href: '/' },
   { label: 'Movies', href: '/movies' },
 ];
 
