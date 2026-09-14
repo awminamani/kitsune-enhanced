@@ -1,8 +1,8 @@
 {
-  "name": "anime-vault",
-  "version": "1.0.0",
+  "name": "kitsune-enhanced",
+  "version": "2.0.0",
   "private": true,
-  "description": "Kitsune — discover trending anime, watch trailers, search 20,000+ titles.",
+  "description": "AnimeVault — premium cinematic anime discovery. Next.js, AniList + Jikan, zero keys.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,14 +10,41 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-navigation-menu": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
+    "@react-three/drei": "^9.108.0",
+    "@react-three/fiber": "^9.0.0",
+    "@types/three": "^0.186.0",
+    "autoprefixer": "^10.6.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "cmdk": "^1.0.0",
+    "embla-carousel-react": "^8.1.0",
+    "gsap": "^3.12.0",
+    "lenis": "^1.1.0",
+    "lightningcss-android-arm64": "^1.33.0",
+    "lucide-react": "^0.400.0",
     "next": "15.5.23",
+    "next-themes": "^0.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss": "^3.4.19",
+    "three": "^0.186.0",
+    "vaul": "^0.9.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "postcss": "^8.4.0",
     "typescript": "^5.7.2"
   }
 }
