@@ -54,32 +54,6 @@ function ScrollIndicator() {
   );
 }
 
-function PaginationDots({
-  count,
-  active,
-  onClick,
-}: {
-  count: number;
-  active: number;
-  onClick: (i: number) => void;
-}) {
-  if (count <= 1) return null;
-  return (
-    <div className="hero-dots" role="tablist" aria-label="Hero slides">
-      {Array.from({ length: count }, (_, i) => (
-        <button
-          key={i}
-          role="tab"
-          aria-selected={i === active}
-          aria-label={`Slide ${i + 1}`}
-          className={cn("hero-dot", i === active && "hero-dot-active")}
-          onClick={() => onClick(i)}
-        />
-      ))}
-    </div>
-  );
-}
-
 function HeroArrows({
   onPrev,
   onNext,
@@ -277,13 +251,6 @@ export default function AnimeHero({
 
       {/* Nav arrows */}
       {dotCount > 1 && <HeroArrows onPrev={goPrev} onNext={goNext} />}
-
-      {/* Pagination dots */}
-      <PaginationDots
-        count={dotCount}
-        active={activeIndex}
-        onClick={onDotClick || (() => {})}
-      />
 
       {/* Content */}
       <div className="hero-content">
