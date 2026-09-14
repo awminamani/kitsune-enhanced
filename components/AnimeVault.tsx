@@ -56,7 +56,7 @@ export default function AnimeVault({
     setSearchOpen(false);
   }, []);
 
-  const quickGenres = useMemo(() => genres.slice(0, 10), [genres]);
+  const quickGenres = useMemo(() => genres.slice(0, 8), [genres]);
 
   return (
     <>
@@ -67,7 +67,6 @@ export default function AnimeVault({
       <MobileNav />
 
       <main className="pt-14 md:pt-16">
-        {/* Hero */}
         {heroAnime && (
           <AnimeHero
             anime={heroAnime}
@@ -77,7 +76,6 @@ export default function AnimeVault({
           />
         )}
 
-        {/* Trending rail */}
         {trending.length > 0 && (
           <div className="relative z-10 -mt-8">
             <AnimeRail
@@ -88,54 +86,53 @@ export default function AnimeVault({
           </div>
         )}
 
-        {/* Infinite explore grid */}
         <section className="px-4 sm:px-6 lg:px-8 pt-12">
           <h2 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight mb-4">
             Explore
           </h2>
 
-          {/* Genre pills */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <button
-              onClick={() => setActiveGenre("")}
-              className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
-                !activeGenre
-                  ? "bg-accent-violet text-white"
-                  : "bg-bg-card border border-border text-text-muted hover:text-text hover:border-accent-violet/40"
-              }`}
-            >
-              All
-            </button>
-            {quickGenres.map((g) => (
+          <div className="space-y-3 mb-6">
+            <div className="flex flex-wrap gap-2">
               <button
-                key={g}
-                onClick={() => setActiveGenre(g === activeGenre ? "" : g)}
-                className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
-                  activeGenre === g
-                    ? "bg-accent-violet text-white"
-                    : "bg-bg-card border border-border text-text-muted hover:text-text hover:border-accent-violet/40"
+                onClick={() => setActiveGenre("")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                  !activeGenre
+                    ? "bg-accent-violet text-white shadow-glow-violet"
+                    : "bg-white/5 border border-white/10 text-text-muted hover:text-text hover:border-accent-violet/30"
                 }`}
               >
-                {g}
+                All
               </button>
-            ))}
-          </div>
+              {quickGenres.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => setActiveGenre(g === activeGenre ? "" : g)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeGenre === g
+                      ? "bg-accent-violet text-white shadow-glow-violet"
+                      : "bg-white/5 border border-white/10 text-text-muted hover:text-text hover:border-accent-violet/30"
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
 
-          {/* Sort pills */}
-          <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none">
-            {SORTS.map((s) => (
-              <button
-                key={s.v}
-                onClick={() => setActiveSort(s.v)}
-                className={`flex-shrink-0 px-4 py-2 text-sm rounded-full transition-colors ${
-                  activeSort === s.v
-                    ? "bg-accent-violet text-white"
-                    : "bg-bg-card border border-border text-text-muted hover:text-text hover:border-accent-violet/40"
-                }`}
-              >
-                {s.l}
-              </button>
-            ))}
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {SORTS.map((s) => (
+                <button
+                  key={s.v}
+                  onClick={() => setActiveSort(s.v)}
+                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeSort === s.v
+                      ? "bg-accent-violet text-white shadow-glow-violet"
+                      : "bg-white/5 border border-white/10 text-text-muted hover:text-text hover:border-accent-violet/30"
+                  }`}
+                >
+                  {s.l}
+                </button>
+              ))}
+            </div>
           </div>
 
           <InfiniteGrid
